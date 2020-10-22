@@ -10,7 +10,7 @@ import rospy
 import threading
 
 import math
-from pub.msg import jetRacerCar as JetRacerCarMsg
+from jetracer.msg import jetRacerCar as JetRacerCarMsg
 
 
 BREAK_KEY = ' '
@@ -38,16 +38,21 @@ throttleBindings = {
 }
 
 steeringBindings = {
-    'a': math.pi / 96,
-    'd': -math.pi / 96,
+    'a': -math.pi / 96,
+    'd': math.pi / 96,
     'A': math.pi / 192,
-    'D': -math.pi / 192
+    'D': -math.pi / 192,
+    'z': 0.0,
+    'x': 0.0,
+    'c': 0.0
 }
 
+KEYBOARD_CONTROL_TOPIC = "/jetracer/keyboard"
+CAR_CONTROL_TOPIC = '/jetRacer_Controller'
 class PublishThread(threading.Thread):
     def __init__(self, rate):
         super(PublishThread, self).__init__()
-        self.publisher = rospy.Publisher('/jetRacer_Controller', JetRacerCarMsg, queue_size=1)
+        self.publisher = rospy.Publisher(KEYBOARD_CONTROL_TOPIC, JetRacerCarMsg, queue_size=1)
         self.throttle = 0.0
         self.steerAngle = 0.0
         self.condition = threading.Condition()
@@ -164,6 +169,12 @@ if __name__ == "__main__":
 
             elif key in steeringBindings.keys():
                 steerAngle += steeringBindings[key]
+                if key == 'z':
+                    steerAngle = -math.pi/12
+                elif key == 'x':
+                    steerAngle = 0.0
+                elif key == 'c':
+                    steerAngle = math.pi/12
 
                 # keep steerAngle in range
                 steerAngle = max(steerAngle, -math.pi/12)
