@@ -13,6 +13,7 @@ import math
 from jetracer.msg import jetRacerCar as JetRacerCarMsg
 
 
+DEBUG = False
 BREAK_KEY = ' '
 msg = """
 Reading from the keyboard  and Publishing to /jetRacer_Controller!
@@ -47,12 +48,15 @@ steeringBindings = {
     'c': 0.0
 }
 
-KEYBOARD_CONTROL_TOPIC = "/jetracer/keyboard"
+KEYBOARD_CONTROL_TOPIC = "/jetRacer/keyboard"
 CAR_CONTROL_TOPIC = '/jetRacer_Controller'
 class PublishThread(threading.Thread):
     def __init__(self, rate):
         super(PublishThread, self).__init__()
-        self.publisher = rospy.Publisher(KEYBOARD_CONTROL_TOPIC, JetRacerCarMsg, queue_size=1)
+        if DEBUG:
+            self.publisher = rospy.Publisher(CAR_CONTROL_TOPIC, JetRacerCarMsg, queue_size=1)
+        else:
+            self.publisher = rospy.Publisher(KEYBOARD_CONTROL_TOPIC, JetRacerCarMsg, queue_size=1)
         self.throttle = 0.0
         self.steerAngle = 0.0
         self.condition = threading.Condition()
@@ -137,6 +141,7 @@ if __name__ == "__main__":
     throttle = rospy.get_param("~throttle", 0.0)
     steerAngle = rospy.get_param("~steerAngle", 0.0)
     repeat = rospy.get_param("~repeat_rate", 0.0)
+    repeat = 10.0
     key_timeout = rospy.get_param("~key_timeout", 0.0)
     if key_timeout == 0.0:
         key_timeout = None
